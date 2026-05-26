@@ -1,7 +1,5 @@
 # 📄 Dokumentacja – Etap I: Diagram UML
 
-*(Wypełnione punkty dotyczą wyłącznie etapu projektowania – diagramu UML. Pozostałe punkty zostaną uzupełnione w kolejnych etapach.)*
-
 ---
 
 ## 1) Spis narzędzi użytych przy tworzeniu projektu
