@@ -8,6 +8,7 @@ public class Oddzial {
     private String numerOddzialu;
     private int maxLozek;
     private List<Pracownik> pracownicy;
+    public List<Pracownik> pobierzPracownikow() { return pracownicy; }
     private List<Pacjent> pacjenci;
 
     public Oddzial(String nazwaOddzialu, String numerOddzialu, int maxLozek) {

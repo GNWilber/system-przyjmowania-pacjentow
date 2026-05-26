@@ -1,8 +1,8 @@
 === RAPORT PACJENTA ===
-Pacjent: Adam Kaszrod
-PESEL: 06222123122
+Pacjent: Krzysztof Przybysz
+PESEL: 05222102134
 Grupa krwi: A+
-Wiek: 20
+Wiek: 21
 W poczekalni: false
 Brak zarejestrowanych alergii.
 Brak chorob przewleklych.
