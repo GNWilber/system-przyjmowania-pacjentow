@@ -201,12 +201,17 @@ public class GlowneOkno extends JFrame {
         gbc.insets = new Insets(4, 4, 4, 4);
         gbc.anchor = GridBagConstraints.WEST;
 
+        // PO — pola formularza z alergiami i chorobami
         JTextField tfImie     = new JTextField(12);
         JTextField tfNazwisko = new JTextField(12);
         JTextField tfPesel    = new JTextField(12);
         JTextField tfData     = new JTextField(12);
         tfData.setToolTipText("Format: RRRR-MM-DD");
-        JTextField tfGrupa = new JTextField(6);
+        JTextField tfGrupa    = new JTextField(6);
+        JTextField tfAlergie  = new JTextField(20);
+        tfAlergie.setToolTipText("Oddziel przecinkiem, np.: Penicylina, Ibuprofen");
+        JTextField tfChoroby  = new JTextField(20);
+        tfChoroby.setToolTipText("Oddziel przecinkiem, np.: Cukrzyca, Nadcisnienie");
 
         gbc.gridx=0; gbc.gridy=0; formularz.add(new JLabel("Imie:"), gbc);
         gbc.gridx=1; formularz.add(tfImie, gbc);
@@ -218,26 +223,54 @@ public class GlowneOkno extends JFrame {
         gbc.gridx=3; formularz.add(tfData, gbc);
         gbc.gridx=0; gbc.gridy=2; formularz.add(new JLabel("Gr. krwi:"), gbc);
         gbc.gridx=1; formularz.add(tfGrupa, gbc);
+        gbc.gridx=0; gbc.gridy=3; formularz.add(new JLabel("Alergie (opcjonalnie):"), gbc);
+        gbc.gridx=1; gbc.gridwidth=3; formularz.add(tfAlergie, gbc); gbc.gridwidth=1;
+        gbc.gridx=0; gbc.gridy=4; formularz.add(new JLabel("Choroby przewlekle (opcjonalnie):"), gbc);
+        gbc.gridx=1; gbc.gridwidth=3; formularz.add(tfChoroby, gbc); gbc.gridwidth=1;
 
         JButton btnDodaj = new JButton("Dodaj pacjenta");
         btnDodaj.addActionListener(e -> {
-            String imie=tfImie.getText().trim(), nazwisko=tfNazwisko.getText().trim(),
-                    pesel=tfPesel.getText().trim(), dataStr=tfData.getText().trim(), grupa=tfGrupa.getText().trim();
-            if (imie.isEmpty()||nazwisko.isEmpty()||pesel.isEmpty()||dataStr.isEmpty()||grupa.isEmpty()) {
-                JOptionPane.showMessageDialog(this,"Wypelnij wszystkie pola.","Blad",JOptionPane.ERROR_MESSAGE); return;
+            String imie     = tfImie.getText().trim();
+            String nazwisko = tfNazwisko.getText().trim();
+            String pesel    = tfPesel.getText().trim();
+            String dataStr  = tfData.getText().trim();
+            String grupa    = tfGrupa.getText().trim();
+            if (imie.isEmpty() || nazwisko.isEmpty() || pesel.isEmpty() || dataStr.isEmpty() || grupa.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Wypelnij wszystkie wymagane pola.", "Blad", JOptionPane.ERROR_MESSAGE);
+                return;
             }
             try {
                 Pacjent nowy = new Pacjent(imie, nazwisko, pesel, LocalDate.parse(dataStr), grupa);
+
+                // Alergie — podziel po przecinku, dodaj każdą niepustą
+                String alergieTxt = tfAlergie.getText().trim();
+                if (!alergieTxt.isEmpty()) {
+                    for (String alergia : alergieTxt.split(",")) {
+                        String a = alergia.trim();
+                        if (!a.isEmpty()) nowy.dodajAlergie(a);
+                    }
+                }
+
+                // Choroby przewlekłe — analogicznie
+                String chorobyTxt = tfChoroby.getText().trim();
+                if (!chorobyTxt.isEmpty()) {
+                    for (String choroba : chorobyTxt.split(",")) {
+                        String ch = choroba.trim();
+                        if (!ch.isEmpty()) nowy.dodajChorobe(ch);
+                    }
+                }
+
                 system.zarejestrujPacjenta(nowy);
                 odswiezTabelePacjentow();
-                tfImie.setText(""); tfNazwisko.setText(""); tfPesel.setText(""); tfData.setText(""); tfGrupa.setText("");
-                JOptionPane.showMessageDialog(this,"Pacjent zostal zarejestrowany.","Sukces",JOptionPane.INFORMATION_MESSAGE);
+                tfImie.setText(""); tfNazwisko.setText(""); tfPesel.setText("");
+                tfData.setText(""); tfGrupa.setText(""); tfAlergie.setText(""); tfChoroby.setText("");
+                JOptionPane.showMessageDialog(this, "Pacjent zostal zarejestrowany.", "Sukces", JOptionPane.INFORMATION_MESSAGE);
             } catch (DateTimeParseException ex) {
-                JOptionPane.showMessageDialog(this,"Niepoprawny format daty. Uzyj RRRR-MM-DD.","Blad",JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Niepoprawny format daty. Uzyj RRRR-MM-DD.", "Blad", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        gbc.gridx=2; gbc.gridy=2; formularz.add(btnDodaj, gbc);
+        gbc.gridx=2; gbc.gridy=5; formularz.add(btnDodaj, gbc);
 
         JButton btnKarta = new JButton("Pokaz karte");
         btnKarta.addActionListener(e -> {
@@ -659,11 +692,32 @@ public class GlowneOkno extends JFrame {
             odswiezTabeleOddzialow(); odswiezPrzyciski.run();
         });
 
+        // PO
         btnStatus.addActionListener(e -> {
             int row = tabela.getSelectedRow();
             if (row < 0) { JOptionPane.showMessageDialog(this,"Zaznacz oddzial.","Informacja",JOptionPane.INFORMATION_MESSAGE); return; }
             Oddzial od = system.pobierzListeOddzialow().get(row);
-            JTextArea area = new JTextArea(od.wyswietlStatus() + "\n\n" + od.wyswietlPracownikow());
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(od.wyswietlStatus());
+            sb.append("\n\n");
+            sb.append(od.wyswietlPracownikow());
+            sb.append("\n\nPacjenci na oddziale (").append(od.pobierzPacjentow().size()).append("):\n");
+            if (od.pobierzPacjentow().isEmpty()) {
+                sb.append("Brak pacjentow na oddziale.\n");
+            } else {
+                int i = 1;
+                for (Pacjent p : od.pobierzPacjentow()) {
+                    sb.append(i++).append(". ")
+                            .append(p.pobierzImie()).append(" ").append(p.pobierzNazwisko())
+                            .append("  |  ID: ").append(p.pobierzIdPacjenta())
+                            .append("  |  Gr. krwi: ").append(p.pobierzGrupeKrwi())
+                            .append("\n");
+                }
+            }
+
+            JTextArea area = new JTextArea(sb.toString());
+            area.setEditable(false);
             JOptionPane.showMessageDialog(this, new JScrollPane(area), "Status oddzialu", JOptionPane.INFORMATION_MESSAGE);
         });
 
