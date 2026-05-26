@@ -159,7 +159,6 @@ public class GlowneOkno extends JFrame {
         JMenuItem itemRaport = new JMenuItem("Generuj raport dzienny");
         itemRaport.addActionListener(e -> {
             JTextArea area = new JTextArea(system.generujRaportDzienny());
-            area.setEditable(false);
             JOptionPane.showMessageDialog(this, new JScrollPane(area), "Raport dzienny", JOptionPane.INFORMATION_MESSAGE);
         });
         JMenuItem itemWyjdz = new JMenuItem("Wyjdz");
@@ -247,7 +246,6 @@ public class GlowneOkno extends JFrame {
             Pacjent p = system.wyszukajPacjenta((String) modelTabeliPacjentow.getValueAt(row, 3));
             if (p != null) {
                 JTextArea area = new JTextArea(p.wyswietlInfo() + "\n\n" + p.wyswietlHistorieWizyt());
-                area.setEditable(false); area.setPreferredSize(new Dimension(800,400));
                 JOptionPane.showMessageDialog(this, new JScrollPane(area), "Karta pacjenta", JOptionPane.INFORMATION_MESSAGE);
             }
         });
@@ -270,7 +268,6 @@ public class GlowneOkno extends JFrame {
                 Pacjent zn = system.wyszukajPacjenta(pesel.trim());
                 if (zn != null) {
                     JTextArea area = new JTextArea(zn.wyswietlInfo() + "\n\n" + zn.wyswietlHistorieWizyt());
-                    area.setEditable(false); area.setPreferredSize(new Dimension(800,400));
                     JOptionPane.showMessageDialog(this, new JScrollPane(area), "Karta pacjenta", JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     JOptionPane.showMessageDialog(this,"Nie znaleziono pacjenta.","Brak wynikow",JOptionPane.WARNING_MESSAGE);
@@ -358,7 +355,6 @@ public class GlowneOkno extends JFrame {
             List<Wizyta> wizyty = system.pobierzListeWizyt();
             if (row < wizyty.size()) {
                 JTextArea area = new JTextArea(wizyty.get(row).wyswietlSzczegoly());
-                area.setEditable(false); area.setPreferredSize(new Dimension(800,400));
                 JOptionPane.showMessageDialog(this, new JScrollPane(area), "Szczegoly wizyty", JOptionPane.INFORMATION_MESSAGE);
             }
         });
@@ -496,7 +492,6 @@ public class GlowneOkno extends JFrame {
             List<Pracownik> lista = system.pobierzListePracownikow();
             if (row < lista.size()) {
                 JTextArea area = new JTextArea(lista.get(row).wyswietlInfo());
-                area.setEditable(false);
                 JOptionPane.showMessageDialog(this, new JScrollPane(area), "Karta pracownika", JOptionPane.INFORMATION_MESSAGE);
             }
         });
@@ -518,7 +513,6 @@ public class GlowneOkno extends JFrame {
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         JTextArea areaKolejka = new JTextArea();
-        areaKolejka.setEditable(false);
         areaKolejka.setFont(new Font("Monospaced", Font.PLAIN, 13));
         areaKolejka.setText(system.wyswietlKolejke());
 
@@ -670,7 +664,6 @@ public class GlowneOkno extends JFrame {
             if (row < 0) { JOptionPane.showMessageDialog(this,"Zaznacz oddzial.","Informacja",JOptionPane.INFORMATION_MESSAGE); return; }
             Oddzial od = system.pobierzListeOddzialow().get(row);
             JTextArea area = new JTextArea(od.wyswietlStatus() + "\n\n" + od.wyswietlPracownikow());
-            area.setEditable(false);
             JOptionPane.showMessageDialog(this, new JScrollPane(area), "Status oddzialu", JOptionPane.INFORMATION_MESSAGE);
         });
 
