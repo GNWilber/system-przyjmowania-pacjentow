@@ -1,0 +1,1 @@
+System Przyjmowania Pacjentów w Szpitalu to aplikacja desktopowa napisana w języku Java, wspierająca pracę personelu medycznego w zakresie rejestracji, obsługi i zarządzania pacjentami. System umożliwia kompleksową obsługę procesu – od momentu zgłoszenia się pacjenta na recepcji, przez przydzielenie go do lekarza, aż po wystawienie diagnozy i zamknięcie wizyty.
