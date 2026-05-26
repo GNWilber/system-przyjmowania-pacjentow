@@ -22,6 +22,8 @@ public class GlowneOkno extends JFrame {
     private DefaultTableModel modelTabeliWizyt;
     private DefaultTableModel modelTabeliPersonelu;
     private DefaultTableModel modelTabeliOddzialow;
+    private JComboBox<Pacjent> cbPacjenciWizyt;
+    private JComboBox<Lekarz> cbLekarzWizyt;
 
     public GlowneOkno() {
         system = SystemPrzyjec.getInstance();
@@ -85,6 +87,12 @@ public class GlowneOkno extends JFrame {
         tabbedPane.addTab("Personel", new ImageIcon(), panelLekarzy);
         tabbedPane.addTab("Kolejka", new ImageIcon(), panelKolejki);
         tabbedPane.addTab("Oddzialy", new ImageIcon(), panelOddzialow);
+
+        tabbedPane.addChangeListener(e -> {
+            if (tabbedPane.getSelectedIndex() == 1) {
+                odswiezKomboWizyt();
+            }
+        });
 
         add(tabbedPane, BorderLayout.CENTER);
 
@@ -273,25 +281,25 @@ public class GlowneOkno extends JFrame {
         gbc.insets = new Insets(4, 4, 4, 4);
         gbc.anchor = GridBagConstraints.WEST;
 
-        JComboBox<Pacjent> cbPacjenci = new JComboBox<>();
-        JComboBox<Lekarz> cbLekarze = new JComboBox<>();
-        for (Pacjent p : system.pobierzListePacjentow()) cbPacjenci.addItem(p);
+        cbPacjenciWizyt = new JComboBox<>();
+        cbLekarzWizyt = new JComboBox<>();
+        for (Pacjent p : system.pobierzListePacjentow()) cbPacjenciWizyt.addItem(p);
         for (Pracownik pr : system.pobierzListePracownikow()) {
-            if (pr instanceof Lekarz) cbLekarze.addItem((Lekarz) pr);
+            if (pr instanceof Lekarz) cbLekarzWizyt.addItem((Lekarz) pr);
         }
-        JTextField tfData = new JTextField("2025-06-01 10:00", 16);
+        JTextField tfData = new JTextField("2026-05-25 10:00", 16);
 
         gbc.gridx = 0; gbc.gridy = 0; formularz.add(new JLabel("Pacjent:"), gbc);
-        gbc.gridx = 1; formularz.add(cbPacjenci, gbc);
+        gbc.gridx = 1; formularz.add(cbPacjenciWizyt, gbc);
         gbc.gridx = 2; formularz.add(new JLabel("Lekarz:"), gbc);
-        gbc.gridx = 3; formularz.add(cbLekarze, gbc);
+        gbc.gridx = 3; formularz.add(cbLekarzWizyt, gbc);
         gbc.gridx = 0; gbc.gridy = 1; formularz.add(new JLabel("Data (RRRR-MM-DD HH:mm):"), gbc);
         gbc.gridx = 1; formularz.add(tfData, gbc);
 
         JButton btnUmow = new JButton("Umow wizyte");
         btnUmow.addActionListener(e -> {
-            Pacjent pacjent = (Pacjent) cbPacjenci.getSelectedItem();
-            Lekarz lekarz = (Lekarz) cbLekarze.getSelectedItem();
+            Pacjent pacjent = (Pacjent) cbPacjenciWizyt.getSelectedItem();
+            Lekarz lekarz = (Lekarz) cbLekarzWizyt.getSelectedItem();
             if (pacjent == null || lekarz == null) {
                 JOptionPane.showMessageDialog(this, "Wybierz pacjenta i lekarza.", "Blad", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -329,6 +337,16 @@ public class GlowneOkno extends JFrame {
         panel.add(scroll, BorderLayout.CENTER);
         panel.add(formularz, BorderLayout.NORTH);
         return panel;
+    }
+
+    private void odswiezKomboWizyt() {
+        cbPacjenciWizyt.removeAllItems();
+        for (Pacjent p : system.pobierzListePacjentow()) cbPacjenciWizyt.addItem(p);
+
+        cbLekarzWizyt.removeAllItems();
+        for (Pracownik pr : system.pobierzListePracownikow()) {
+            if (pr instanceof Lekarz) cbLekarzWizyt.addItem((Lekarz) pr);
+        }
     }
 
     private JPanel zbudujPanelPersonelu() {

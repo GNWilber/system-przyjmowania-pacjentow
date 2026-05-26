@@ -1,0 +1,9 @@
+=== RAPORT PACJENTA ===
+Pacjent: Adam Kaszrod
+PESEL: 06222123122
+Grupa krwi: A+
+Wiek: 20
+W poczekalni: false
+Brak zarejestrowanych alergii.
+Brak chorob przewleklych.
+Brak wizyt w historii.
