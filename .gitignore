@@ -1,3 +1,8 @@
+# karta*.txt
+# code_export.py
+# code.md
+
+
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

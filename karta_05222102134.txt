@@ -1,9 +1,0 @@
-=== RAPORT PACJENTA ===
-Pacjent: Krzysztof Przybysz
-PESEL: 05222102134
-Grupa krwi: A+
-Wiek: 21
-W poczekalni: false
-Brak zarejestrowanych alergii.
-Brak chorob przewleklych.
-Brak wizyt w historii.
