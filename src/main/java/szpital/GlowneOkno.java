@@ -28,7 +28,7 @@ public class GlowneOkno extends JFrame {
         zaladujDanePrzykladowe();
         inicjalizujKomponenty();
         inicjalizujMenu();
-        setTitle("System Przyjec Pacjentow - Szpital");
+        setTitle("System zarządzania szpitalem");
         setSize(1100, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
