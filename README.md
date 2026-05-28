@@ -1,359 +1,325 @@
-# 📄 Dokumentacja – Etap I: Diagram UML
+# Dokumentacja
+
+## Założenia i opis funkcjonalny
+
+System zarządzania przychodnią lekarską uruchamiany jako aplikacja desktopowa (Java Swing). Przy starcie ładowane są przykładowe dane (lekarze, pielęgniarki, recepcjonista, 10 pacjentów, 5 oddziałów, kilka wizyt).
+
+**Funkcjonalności:**
+- Rejestracja pacjentów z grupą krwi, alergiami i chorobami przewlekłymi
+- Wyszukiwanie pacjentów po PESEL lub imieniu i nazwisku
+- Umawianie, prowadzenie i anulowanie wizyt lekarskich
+- Wystawianie diagnoz z kodami ICD-10 i zaleceniami
+- Zarządzanie personelem (dodawanie lekarzy, dezaktywacja pracowników)
+- Kolejka oczekujących – dodawanie pacjentów i wywoływanie kolejnych
+- Oddziały – przyjmowanie/wypisywanie pacjentów, przypisywanie personelu
+- Eksport karty pacjenta do pliku `.txt`
+- Raport dzienny ze statystykami systemu
 
 ---
 
-## 1) Spis narzędzi użytych przy tworzeniu projektu
+## Diagram UML
 
-| Narzędzie | Przeznaczenie |
-|---|---|
-| draw.io (diagrams.net) | Tworzenie diagramu klas UML |
-| Java SE | Docelowe środowisko implementacji |
-| IntelliJ IDEA | Planowane IDE do implementacji |
-| GitHub | Hosting repozytorium i kontrola wersji |
+### Klasy — zawartość pól
 
+```
+<<interface>>
+IRaportowalny
 ---
++ generujRaport() : String
++ eksportujDoPliku(sciezka : String) : void
+```
 
-## 2) Założenia i opis funkcjonalny programu
-
-### Cel systemu
-
-System Przyjmowania Pacjentów w Szpitalu to aplikacja desktopowa napisana w języku Java, wspierająca pracę personelu medycznego w zakresie rejestracji, obsługi i zarządzania pacjentami. System umożliwia kompleksową obsługę procesu – od momentu zgłoszenia się pacjenta na recepcji, przez przydzielenie go do lekarza, aż po wystawienie diagnozy i zamknięcie wizyty.
-
-### Główne funkcjonalności
-
-- **Rejestracja pacjentów** – wprowadzanie danych osobowych, grupy krwi, historii chorób i alergii; wyszukiwanie pacjentów po numerze PESEL lub imieniu i nazwisku.
-- **Zarządzanie kolejką oczekujących** – dodawanie pacjentów do kolejki, obsługa trybu priorytetowego, wywoływanie kolejnego pacjenta.
-- **Obsługa wizyt lekarskich** – umawianie wizyt, zmiana statusu wizyty (`ZAPLANOWANA → W_TRAKCIE → ZAKONCZONA / ODWOLANA`), dodawanie notatek.
-- **Wystawianie diagnoz** – lekarz wystawia diagnozę z kodem ICD-10 i opcjonalnymi zaleceniami; diagnoza jest przypisywana do wizyty i zapisywana w karcie pacjenta.
-- **Karta pacjenta** – każdy pacjent posiada indywidualną kartę przechowującą pełną historię wizyt, alergie i choroby przewlekłe.
-- **Zarządzanie oddziałami** – przydzielanie pacjentów do oddziałów, zarządzanie łóżkami, przypisywanie personelu do oddziału.
-- **Zarządzanie personelem** – obsługa danych lekarzy, pielęgniarek i recepcjonistów; dezaktywacja pracowników; przegląd harmonogramów.
-- **Raportowanie** – generowanie raportu dziennego przez system oraz eksport danych pacjenta do pliku tekstowego.
-- **Graficzny interfejs użytkownika (GUI)** – okno z zakładkami (JTabbedPane) oddzielającymi moduły: Pacjenci, Wizyty, Personel, Kolejka, Oddziały.
-
-### Użytkownicy systemu
-
-| Rola | Uprawnienia |
-|---|---|
-| Recepcjonista | Rejestracja pacjentów, zarządzanie kolejką |
-| Lekarz | Prowadzenie wizyt, wystawianie diagnoz |
-| Pielęgniarka | Przydzielanie łóżek, opieka nad pacjentem |
-| Administrator (dev) | Pełny dostęp przez `SystemPrzyjec` |
-
-### Założenia projektowe
-
-- Brak metod `get()` / `set()` – dane są hermetycznie ukryte; dostęp odbywa się wyłącznie przez metody biznesowe.
-- Klasy `Osoba` i `Pracownik` są abstrakcyjne – nie można tworzyć ich instancji bezpośrednio.
-- `SystemPrzyjec` działa jako Singleton – istnieje dokładnie jedna instancja systemu w trakcie działania aplikacji.
-- Polimorfizm realizowany jest przez nadpisanie metod `wyswietlInfo()` oraz `wykonajObowiazki()` w każdej klasie pochodnej.
-- Interfejs `IRaportowalny` wymusza ujednolicony sposób raportowania dla klas, które go implementują.
-
+```
+<<abstract>>
+Osoba
 ---
-
-## 3) Klasy
-
-### a) Diagram UML własnych klas
-
-Diagram klas został wykonany w narzędziu draw.io zgodnie z notacją UML.
-Poniżej opisano wszystkie elementy diagramu.
-
+# imie : String
+# nazwisko : String
+# pesel : String
+# dataUrodzenia : LocalDate
 ---
++ Osoba(imie, nazwisko, pesel, dataUrodzenia)
++ wyswietlInfo() : String  {abstract}
++ obliczWiek() : int
++ peselPasuje(pesel : String) : boolean
++ pobierzImie() : String
++ pobierzNazwisko() : String
++ pobierzPesel() : String
++ toString() : String
+```
 
-#### Legenda notacji
-
-| Symbol | Znaczenie |
-|---|---|
-| `+` | składowa publiczna (`public`) |
-| `-` | składowa prywatna (`private`) |
-| `#` | składowa chroniona (`protected`) |
-| `<<abstract>>` | klasa abstrakcyjna |
-| `<<interface>>` | interfejs |
-| `<<enum>>` | typ wyliczeniowy |
-| →▷ (pusta strzałka) | uogólnienie / dziedziczenie |
-| --▷ (przerywana pusta) | realizacja interfejsu |
-| ◆— (romb wypełniony) | kompozycja |
-| --→ (przerywana pełna) | zależność |
-
+```
+<<abstract>>
+Pracownik
 ---
-
-#### Wykaz klas i ich składowych
-
-**`<<interface>> IRaportowalny`**
-Interfejs wymuszający kontrakt raportowania na klasach implementujących.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `+ generujRaport()` | `String` | Zwraca raport tekstowy obiektu |
-| `+ eksportujDoPliku(sciezka: String)` | `void` | Eksportuje raport do pliku |
-
+# idPracownika : String
+# specjalizacja : String
+# aktywny : boolean
 ---
++ Pracownik(imie, nazwisko, pesel, dataUrodzenia, idPracownika, specjalizacja)
++ wykonajObowiazki() : void  {abstract}
++ wyswietlInfo() : String  {abstract}
++ dezaktywuj() : void
++ wyswietlKarte() : String
++ pobierzIdPracownika() : String
++ pobierzSpecjalizacje() : String
++ czyAktywny() : boolean
+```
 
-**`<<abstract>> Osoba`**
-Abstrakcyjna klasa bazowa dla wszystkich osób w systemie. Przechowuje dane osobowe wspólne dla pacjentów i pracowników.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `# imie` | `String` | Imię osoby |
-| `# nazwisko` | `String` | Nazwisko osoby |
-| `# pesel` | `String` | Numer PESEL |
-| `# dataUrodzenia` | `LocalDate` | Data urodzenia |
-| `+ Osoba(imie, nazwisko, pesel, dataUrodzenia)` | konstruktor | Inicjalizuje dane osobowe |
-| `+ wyswietlInfo()` | `String` *(abstract)* | Zwraca opis osoby – implementacja w podklasach |
-| `+ toString()` | `String` | Tekstowa reprezentacja obiektu |
-| `+ peselPasuje(pesel: String)` | `boolean` | Sprawdza zgodność PESEL |
-| `+ obliczWiek()` | `int` | Oblicza wiek na podstawie daty urodzenia |
-
+```
+Lekarz
 ---
-
-**`<<abstract>> Pracownik`** *(dziedziczy po `Osoba`)*
-Abstrakcyjna klasa reprezentująca każdego pracownika szpitala. Rozszerza `Osoba` o dane służbowe.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `# idPracownika` | `String` | Unikalny identyfikator pracownika |
-| `# specjalizacja` | `String` | Specjalizacja / stanowisko |
-| `# aktywny` | `boolean` | Czy pracownik jest aktywny w systemie |
-| `+ Pracownik(imie, nazwisko, pesel, dataUrodzenia, idPracownika, specjalizacja)` | konstruktor | Inicjalizuje dane pracownika |
-| `+ wykonajObowiazki()` | `void` *(abstract)* | Polimorficzne wykonanie obowiązków |
-| `+ wyswietlInfo()` | `String` *(abstract)* | Polimorficzny opis pracownika |
-| `+ wyswietlKarte()` | `String` | Zwraca kartę służbową pracownika |
-| `+ dezaktywuj()` | `void` | Oznacza pracownika jako nieaktywnego |
-
+- numerPWZ : String
+- listaWizyt : List<Wizyta>
+- dostepny : boolean
 ---
++ Lekarz(imie, nazwisko, pesel, dataUrodzenia, idPracownika, specjalizacja, numerPWZ)
++ wykonajObowiazki() : void
++ wyswietlInfo() : String
++ przyjmijPacjenta(pacjent : Pacjent) : Wizyta
++ wystawDiagnoze(wizyta, opis, kodICD) : Diagnoza
++ wystawDiagnoze(wizyta, opis, kodICD, zalecenia) : Diagnoza
++ dodajWizyte(wizyta : Wizyta) : void
++ ustawDostepnosc(stan : boolean) : void
++ wyswietlHarmonogram() : String
++ pobierzNumerPWZ() : String
++ czyDostepny() : boolean
++ toString() : String
+```
 
-**`Pacjent`** *(dziedziczy po `Osoba`, implementuje `IRaportowalny`)*
-Klasa reprezentująca pacjenta szpitala. Posiada kartę pacjenta (kompozycja).
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- idPacjenta` | `String` | Unikalny identyfikator pacjenta |
-| `- grupaKrwi` | `String` | Grupa krwi pacjenta |
-| `- kartaPacjenta` | `KartaPacjenta` | Karta z historią wizyt (kompozycja) |
-| `- wPoczekalni` | `boolean` | Czy pacjent aktualnie czeka |
-| `+ Pacjent(imie, nazwisko, pesel, dataUrodzenia, grupaKrwi)` | konstruktor | Inicjalizuje pacjenta i tworzy jego kartę |
-| `+ wyswietlInfo()` | `String` | Nadpisana – zwraca dane pacjenta |
-| `+ generujRaport()` | `String` | Implementacja z `IRaportowalny` |
-| `+ eksportujDoPliku(sciezka: String)` | `void` | Implementacja z `IRaportowalny` |
-| `+ dodajWizyte(wizyta: Wizyta)` | `void` | Dodaje wizytę do karty |
-| `+ wyswietlHistorieWizyt()` | `String` | Deleguje do `KartaPacjenta` |
-| `+ zaznaczWPoczekalni(stan: boolean)` | `void` | Zmienia status oczekiwania |
-
+```
+Pielegniarka
 ---
-
-**`Lekarz`** *(dziedziczy po `Pracownik`)*
-Klasa reprezentująca lekarza. Umożliwia prowadzenie wizyt i wystawianie diagnoz (z przeciążeniem metody).
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- numerPWZ` | `String` | Numer prawa wykonywania zawodu |
-| `- listaWizyt` | `List<Wizyta>` | Wizyty przypisane do lekarza |
-| `- dostepny` | `boolean` | Czy lekarz jest dostępny |
-| `+ Lekarz(imie, nazwisko, pesel, dataUrodzenia, idPracownika, specjalizacja, numerPWZ)` | konstruktor | Inicjalizuje lekarza |
-| `+ wykonajObowiazki()` | `void` | Nadpisana – lekarz przyjmuje pacjentów |
-| `+ wyswietlInfo()` | `String` | Nadpisana – dane lekarza + PWZ |
-| `+ przyjmijPacjenta(pacjent: Pacjent)` | `Wizyta` | Rozpoczyna wizytę z pacjentem |
-| `+ wystawDiagnoze(wizyta, opis, kodICD)` | `Diagnoza` | Wystawia diagnozę bez zaleceń |
-| `+ wystawDiagnoze(wizyta, opis, kodICD, zalecenia)` | `Diagnoza` | **Przeciążona** – z zaleceniami |
-| `+ ustawDostepnosc(stan: boolean)` | `void` | Zmienia dostępność lekarza |
-| `+ wyswietlHarmonogram()` | `String` | Zwraca listę zaplanowanych wizyt |
-
+- oddzial : Oddzial
+- numerSali : int
 ---
++ Pielegniarka(imie, nazwisko, pesel, dataUrodzenia, idPracownika, specjalizacja, numerSali)
++ wykonajObowiazki() : void
++ wyswietlInfo() : String
++ przydzielLozko(pacjent : Pacjent, numerLozka : int) : void
++ zaopiekujSie(pacjent : Pacjent) : void
++ zmienOddzial(oddzial : Oddzial) : void
++ pobierzNumerSali() : int
++ toString() : String
+```
 
-**`Pielegniarka`** *(dziedziczy po `Pracownik`)*
-Klasa reprezentująca pielęgniarkę przypisaną do oddziału.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- oddzial` | `Oddzial` | Przypisany oddział |
-| `- numerSali` | `int` | Numer sali dyżurowej |
-| `+ Pielegniarka(imie, nazwisko, pesel, dataUrodzenia, idPracownika, specjalizacja, numerSali)` | konstruktor | Inicjalizuje pielęgniarkę |
-| `+ wykonajObowiazki()` | `void` | Nadpisana – pielęgniarka opiekuje się pacjentami |
-| `+ wyswietlInfo()` | `String` | Nadpisana – dane pielęgniarki + sala |
-| `+ przydzielLozko(pacjent, numerLozka)` | `void` | Przydziela łóżko pacjentowi |
-| `+ zaopiekujSie(pacjent: Pacjent)` | `void` | Rejestruje opiekę nad pacjentem |
-| `+ zmienOddzial(oddzial: Oddzial)` | `void` | Przenosi na inny oddział |
-
+```
+Recepcjonista
 ---
-
-**`Recepcjonista`** *(dziedziczy po `Pracownik`)*
-Klasa obsługująca rejestrację pacjentów i kolejkę. Posiada przeciążoną metodę rejestracji.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- numerStanowiska` | `int` | Numer stanowiska rejestracji |
-| `- zarejestrowanychDzisiaj` | `int` | Licznik dziennych rejestracji |
-| `+ Recepcjonista(imie, nazwisko, pesel, dataUrodzenia, idPracownika, numerStanowiska)` | konstruktor | Inicjalizuje recepcjonistę |
-| `+ wykonajObowiazki()` | `void` | Nadpisana – recepcjonista rejestruje pacjentów |
-| `+ wyswietlInfo()` | `String` | Nadpisana – dane + numer stanowiska |
-| `+ zarejestrujPacjenta(pacjent: Pacjent)` | `String` | Standardowa rejestracja |
-| `+ zarejestrujPacjenta(pacjent, priorytet: boolean)` | `String` | **Przeciążona** – z trybem priorytetowym |
-| `+ wyswietlStatystyki()` | `String` | Zwraca statystyki stanowiska |
-
+- numerStanowiska : int
+- zarejestrowanychDzisiaj : int
 ---
++ Recepcjonista(imie, nazwisko, pesel, dataUrodzenia, idPracownika, numerStanowiska)
++ wykonajObowiazki() : void
++ wyswietlInfo() : String
++ zarejestrujPacjenta(pacjent : Pacjent) : String
++ zarejestrujPacjenta(pacjent : Pacjent, priorytet : boolean) : String
++ wyswietlStatystyki() : String
++ pobierzNumerStanowiska() : int
++ toString() : String
+```
 
-**`Wizyta`**
-Klasa reprezentująca pojedynczą wizytę lekarską. Łączy pacjenta z lekarzem i przechowuje diagnozę.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- idWizyty` | `String` | Unikalny identyfikator wizyty |
-| `- pacjent` | `Pacjent` | Pacjent uczestniczący w wizycie |
-| `- lekarz` | `Lekarz` | Lekarz prowadzący wizytę |
-| `- dataWizyty` | `LocalDateTime` | Data i godzina wizyty |
-| `- status` | `StatusWizyty` | Aktualny status wizyty (enum) |
-| `- diagnoza` | `Diagnoza` | Diagnoza wystawiona podczas wizyty |
-| `- notatki` | `String` | Notatki lekarza |
-| `+ Wizyta(idWizyty, pacjent, lekarz, dataWizyty)` | konstruktor | Tworzy wizytę ze statusem ZAPLANOWANA |
-| `+ zakonczWizyte(diagnoza: Diagnoza)` | `void` | Zamyka wizytę, zapisuje diagnozę |
-| `+ anulujWizyte(powod: String)` | `void` | Odwołuje wizytę |
-| `+ rozpocznijWizyte()` | `void` | Zmienia status na W_TRAKCIE |
-| `+ dodajNotatke(notatka: String)` | `void` | Dopisuje notatkę do wizyty |
-| `+ wyswietlSzczegoly()` | `String` | Pełny opis wizyty |
-| `+ toString()` | `String` | Skrócony opis wizyty |
-
+```
+Pacjent
 ---
-
-**`Diagnoza`**
-Klasa przechowująca wynik diagnostyczny wizyty. Konstruktor jest przeciążony.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- idDiagnozy` | `String` | Unikalny identyfikator diagnozy |
-| `- opis` | `String` | Opis słowny diagnozy |
-| `- kodICD` | `String` | Kod ICD-10 schorzenia |
-| `- zalecenia` | `String` | Zalecenia lekarskie (opcjonalne) |
-| `- dataWystawienia` | `LocalDate` | Data wystawienia |
-| `+ Diagnoza(idDiagnozy, opis, kodICD)` | konstruktor | Diagnoza bez zaleceń |
-| `+ Diagnoza(idDiagnozy, opis, kodICD, zalecenia)` | **konstruktor przeciążony** | Diagnoza z zaleceniami |
-| `+ wyswietlDiagnoze()` | `String` | Pełny opis diagnozy |
-| `+ toString()` | `String` | Skrócony opis |
-| `+ czyPilna()` | `boolean` | Sprawdza czy diagnoza wymaga pilnej interwencji |
-
+- licznik : int  {static}
+- idPacjenta : String
+- grupaKrwi : String
+- kartaPacjenta : KartaPacjenta
+- wPoczekalni : boolean
 ---
++ Pacjent(imie, nazwisko, pesel, dataUrodzenia, grupaKrwi)
++ wyswietlInfo() : String
++ generujRaport() : String
++ eksportujDoPliku(sciezka : String) : void
++ dodajWizyte(wizyta : Wizyta) : void
++ dodajAlergie(alergia : String) : void
++ dodajChorobe(choroba : String) : void
++ zaznaczWPoczekalni(stan : boolean) : void
++ wyswietlHistorieWizyt() : String
++ pobierzIdPacjenta() : String
++ pobierzGrupeKrwi() : String
++ czyWPoczekalni() : boolean
++ toString() : String
+```
 
-**`KartaPacjenta`**
-Klasa przechowująca kompletną dokumentację medyczną pacjenta. Tworzona wyłącznie przez `Pacjent` (kompozycja).
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- idKarty` | `String` | Identyfikator karty |
-| `- historiaWizyt` | `List<Wizyta>` | Lista wszystkich wizyt |
-| `- alergie` | `List<String>` | Lista alergii pacjenta |
-| `- chorobyPrzewlekle` | `List<String>` | Lista chorób przewlekłych |
-| `- dataZalozenia` | `LocalDate` | Data założenia karty |
-| `+ KartaPacjenta(idKarty: String)` | konstruktor | Tworzy pustą kartę |
-| `+ dodajWizyte(wizyta: Wizyta)` | `void` | Dodaje wizytę do historii |
-| `+ dodajAlergie(alergia: String)` | `void` | Rejestruje alergię |
-| `+ dodajChorobe(choroba: String)` | `void` | Rejestruje chorobę przewlekłą |
-| `+ generujHistorie()` | `String` | Zwraca pełną historię wizyt |
-| `+ wyswietlAlergie()` | `String` | Zwraca listę alergii |
-| `+ wyswietlChoroby()` | `String` | Zwraca listę chorób |
-| `+ liczbaWizyt()` | `int` | Zwraca liczbę odbytych wizyt |
-
+```
+KartaPacjenta
 ---
-
-**`Oddzial`**
-Klasa reprezentująca oddział szpitalny. Zarządza przydzielonymi pacjentami i personelem.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- nazwaOddzialu` | `String` | Nazwa oddziału |
-| `- numerOddzialu` | `String` | Numer/kod oddziału |
-| `- maxLozek` | `int` | Maksymalna liczba łóżek |
-| `- pracownicy` | `List<Pracownik>` | Lista pracowników oddziału |
-| `- pacjenci` | `List<Pacjent>` | Lista pacjentów na oddziale |
-| `+ Oddzial(nazwaOddzialu, numerOddzialu, maxLozek)` | konstruktor | Inicjalizuje oddział |
-| `+ przyjmijPacjenta(pacjent: Pacjent)` | `boolean` | Przyjmuje jeśli są wolne łóżka |
-| `+ wypiszPacjenta(pacjent: Pacjent)` | `boolean` | Wypisuje pacjenta z oddziału |
-| `+ dodajPracownika(pracownik: Pracownik)` | `void` | Przydziela pracownika |
-| `+ usunPracownika(pracownik: Pracownik)` | `void` | Usuwa pracownika z oddziału |
-| `+ wyswietlStatus()` | `String` | Raport stanu oddziału |
-| `+ dostepneLozka()` | `int` | Zwraca liczbę wolnych łóżek |
-| `+ wyswietlPracownikow()` | `String` | Lista personelu oddziału |
-
+- idKarty : String
+- historiaWizyt : List<Wizyta>
+- alergie : List<String>
+- chorobyPrzewlekle : List<String>
+- dataZalozenia : LocalDate
 ---
++ KartaPacjenta(idKarty : String)
++ dodajWizyte(wizyta : Wizyta) : void
++ dodajAlergie(alergia : String) : void
++ dodajChorobe(choroba : String) : void
++ generujHistorie() : String
++ wyswietlAlergie() : String
++ wyswietlChoroby() : String
++ liczbaWizyt() : int
+```
 
-**`SystemPrzyjec`** *(Singleton)*
-Centralna klasa kontrolera systemu. Zarządza wszystkimi obiektami w aplikacji.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- instancja` | `SystemPrzyjec` *(static)* | Jedyna instancja Singletona |
-| `- listaPacjentow` | `List<Pacjent>` | Wszyscy zarejestrowani pacjenci |
-| `- listaPracownikow` | `List<Pracownik>` | Wszyscy pracownicy |
-| `- listaOddzialow` | `List<Oddzial>` | Wszystkie oddziały |
-| `- kolejkaOczekujacych` | `Queue<Pacjent>` | Kolejka pacjentów w poczekalni |
-| `+ getInstance()` | `SystemPrzyjec` *(static)* | Zwraca lub tworzy instancję |
-| `+ zarejestrujPacjenta(pacjent: Pacjent)` | `void` | Dodaje pacjenta do systemu |
-| `+ wyszukajPacjenta(pesel: String)` | `Pacjent` | Wyszukuje po PESEL |
-| `+ wyszukajPacjenta(imie, nazwisko)` | `List<Pacjent>` | **Przeciążona** – wyszukuje po nazwisku |
-| `+ umowWizyte(pacjent, lekarz, data)` | `Wizyta` | Tworzy i rejestruje wizytę |
-| `+ dodajDoKolejki(pacjent: Pacjent)` | `void` | Dodaje do kolejki oczekujących |
-| `+ wywolajNastepnego()` | `Pacjent` | Pobiera pierwszego z kolejki |
-| `+ dodajOddzial(oddzial: Oddzial)` | `void` | Rejestruje oddział w systemie |
-| `+ generujRaportDzienny()` | `String` | Zestawienie aktywności z danego dnia |
-| `+ wyswietlKolejke()` | `String` | Lista oczekujących pacjentów |
-| `+ wyswietlWszystkichPacjentow()` | `void` | Wyświetla wszystkich pacjentów |
-
+```
+Wizyta
 ---
-
-**`<<enum>> StatusWizyty`**
-Typ wyliczeniowy określający możliwe stany wizyty.
-
-| Wartość | Opis |
-|---|---|
-| `ZAPLANOWANA` | Wizyta zaplanowana, jeszcze się nie rozpoczęła |
-| `W_TRAKCIE` | Wizyta trwa |
-| `ZAKONCZONA` | Wizyta zakończona z diagnozą |
-| `ODWOLANA` | Wizyta odwołana |
-
+- licznik : int  {static}
+- idWizyty : String
+- pacjent : Pacjent
+- lekarz : Lekarz
+- dataWizyty : LocalDateTime
+- status : StatusWizyty
+- diagnoza : Diagnoza
+- notatki : String
 ---
++ Wizyta(pacjent, lekarz, dataWizyty)
++ rozpocznijWizyte() : void
++ zakonczWizyte(diagnoza : Diagnoza) : void
++ anulujWizyte(powod : String) : void
++ dodajNotatke(notatka : String) : void
++ wyswietlSzczegoly() : String
++ pobierzIdWizyty() : String
++ pobierzPacjenta() : Pacjent
++ pobierzLekarza() : Lekarz
++ pobierzDate() : LocalDateTime
++ pobierzStatus() : StatusWizyty
++ toString() : String
+```
 
-**`GlowneOkno`** *(GUI – rozszerza `JFrame`)*
-Główne okno aplikacji z graficznym interfejsem użytkownika opartym na zakładkach.
-
-| Składowa | Typ | Opis |
-|---|---|---|
-| `- system` | `SystemPrzyjec` | Referencja do systemu (Singleton) |
-| `- tabbedPane` | `JTabbedPane` | Kontener zakładek |
-| `- panelPacjentow` | `JPanel` | Zakładka zarządzania pacjentami |
-| `- panelWizyt` | `JPanel` | Zakładka wizyt |
-| `- panelLekarzy` | `JPanel` | Zakładka personelu |
-| `- panelKolejki` | `JPanel` | Zakładka kolejki oczekujących |
-| `+ GlowneOkno()` | konstruktor | Inicjalizuje okno i komponenty |
-| `+ inicjalizujKomponenty()` | `void` | Buduje strukturę GUI |
-| `+ inicjalizujMenu()` | `void` | Tworzy pasek menu |
-| `+ pokazPanelPacjentow()` | `void` | Przełącza na panel pacjentów |
-| `+ pokazPanelWizyt()` | `void` | Przełącza na panel wizyt |
-| `+ pokazPanelKolejki()` | `void` | Przełącza na panel kolejki |
-| `+ odswiezWidok()` | `void` | Odświeża dane w aktywnym panelu |
-| `+ main(args: String[])` | `void` *(static)* | Punkt startowy aplikacji |
-
+```
+Diagnoza
 ---
-
-#### Zestawienie powiązań na diagramie
-
-| Typ powiązania | Od | Do | Opis |
-|---|---|---|---|
-| Uogólnienie | `Pracownik` | `Osoba` | Pracownik jest Osobą |
-| Uogólnienie | `Pacjent` | `Osoba` | Pacjent jest Osobą |
-| Uogólnienie | `Lekarz` | `Pracownik` | Lekarz jest Pracownikiem |
-| Uogólnienie | `Pielegniarka` | `Pracownik` | Pielęgniarka jest Pracownikiem |
-| Uogólnienie | `Recepcjonista` | `Pracownik` | Recepcjonista jest Pracownikiem |
-| Realizacja | `Pacjent` | `IRaportowalny` | Pacjent implementuje raportowanie |
-| Kompozycja | `Pacjent` | `KartaPacjenta` | Karta istnieje tylko wraz z pacjentem |
-| Kompozycja | `Wizyta` | `Diagnoza` | Diagnoza jest częścią wizyty |
-| Kompozycja | `Oddzial` | `Pacjent` | Pacjenci należą do oddziału |
-| Kompozycja | `Oddzial` | `Pracownik` | Pracownicy należą do oddziału |
-| Zależność | `Lekarz` | `Wizyta` | Lekarz tworzy wizyty |
-| Zależność | `Lekarz` | `Diagnoza` | Lekarz wystawia diagnozy |
-| Zależność | `Recepcjonista` | `Pacjent` | Recepcjonista rejestruje pacjentów |
-| Zależność | `SystemPrzyjec` | `Wizyta` | System zarządza wizytami |
-| Zależność | `SystemPrzyjec` | `Pacjent` | System zarządza pacjentami |
-| Zależność | `SystemPrzyjec` | `Oddzial` | System zarządza oddziałami |
-| Zależność | `GlowneOkno` | `SystemPrzyjec` | GUI korzysta z systemu |
-| Zależność | `Wizyta` | `StatusWizyty` | Wizyta używa enuma statusu |
-
+- licznik : int  {static}
+- idDiagnozy : String
+- opis : String
+- kodICD : String
+- zalecenia : String
+- dataWystawienia : LocalDate
 ---
++ Diagnoza(opis, kodICD)
++ Diagnoza(opis, kodICD, zalecenia)
++ wyswietlDiagnoze() : String
++ czyPilna() : boolean
++ toString() : String
+```
 
-*Sekcje 3b, 4, 5, 6, 7, 8 – do uzupełnienia po etapie implementacji.*
+```
+Oddzial
+---
+- nazwaOddzialu : String
+- numerOddzialu : String
+- maxLozek : int
+- pracownicy : List<Pracownik>
+- pacjenci : List<Pacjent>
+---
++ Oddzial(nazwaOddzialu, numerOddzialu, maxLozek)
++ przyjmijPacjenta(pacjent : Pacjent) : boolean
++ wypiszPacjenta(pacjent : Pacjent) : boolean
++ dodajPracownika(pracownik : Pracownik) : void
++ usunPracownika(pracownik : Pracownik) : void
++ dostepneLozka() : int
++ wyswietlStatus() : String
++ wyswietlPracownikow() : String
++ pobierzNazwe() : String
++ pobierzNumer() : String
++ pobierzMaxLozek() : int
++ pobierzPacjentow() : List<Pacjent>
++ pobierzPracownikow() : List<Pracownik>
++ toString() : String
+```
+
+```
+SystemPrzyjec
+---
+- instancja : SystemPrzyjec  {static}
+- listaPacjentow : List<Pacjent>
+- listaPracownikow : List<Pracownik>
+- listaOddzialow : List<Oddzial>
+- listaWszystkichWizyt : List<Wizyta>
+- kolejkaOczekujacych : Queue<Pacjent>
+---
+- SystemPrzyjec()
++ getInstance() : SystemPrzyjec  {static}
++ zarejestrujPacjenta(pacjent : Pacjent) : void
++ wyszukajPacjenta(pesel : String) : Pacjent
++ wyszukajPacjenta(imie : String, nazwisko : String) : List<Pacjent>
++ umowWizyte(pacjent, lekarz, data) : Wizyta
++ dodajDoKolejki(pacjent : Pacjent) : void
++ wywolajNastepnego() : Pacjent
++ dodajOddzial(oddzial : Oddzial) : void
++ dodajPracownika(pracownik : Pracownik) : void
++ generujRaportDzienny() : String
++ wyswietlKolejke() : String
++ pobierzListePacjentow() : List<Pacjent>
++ pobierzListePracownikow() : List<Pracownik>
++ pobierzListeOddzialow() : List<Oddzial>
++ pobierzListeWizyt() : List<Wizyta>
++ pobierzKolejke() : Queue<Pacjent>
+```
+
+```
+<<enum>>
+StatusWizyty
+---
+ZAPLANOWANA
+W_TRAKCIE
+ZAKONCZONA
+ODWOLANA
+```
+
+```
+GlowneOkno
+---
+- system : SystemPrzyjec
+- tabbedPane : JTabbedPane
+- modelTabeliPacjentow : DefaultTableModel
+- modelTabeliWizyt : DefaultTableModel
+- modelTabeliPersonelu : DefaultTableModel
+- modelTabeliOddzialow : DefaultTableModel
+- cbPacjenciWizyt : JComboBox<Pacjent>
+- cbLekarzWizyt : JComboBox<Lekarz>
+---
++ GlowneOkno()
+- zaladujDanePrzykladowe() : void
+- inicjalizujKomponenty() : void
+- inicjalizujMenu() : void
+- zbudujPanelPacjentow() : JPanel
+- zbudujPanelWizyt() : JPanel
+- zbudujPanelPersonelu() : JPanel
+- zbudujPanelKolejki() : JPanel
+- zbudujPanelOddzialow() : JPanel
+- odswiezKomboWizyt() : void
+- odswiezTabelePacjentow() : void
+- odswiezTabeleWizyt() : void
+- odswiezTabelePersonelu() : void
+- odswiezTabeleOddzialow() : void
+- odswiezPanelKolejki() : void
++ main(args : String[]) : void  {static}
+```
+
+### Połączenia
+
+```
+Osoba          <|--  Pacjent          (dziedziczenie)
+Osoba          <|--  Pracownik        (dziedziczenie)
+Pracownik      <|--  Lekarz           (dziedziczenie)
+Pracownik      <|--  Pielegniarka     (dziedziczenie)
+Pracownik      <|--  Recepcjonista    (dziedziczenie)
+Pacjent        ..|>  IRaportowalny    (realizacja interfejsu)
+Pacjent        *--   KartaPacjenta    (kompozycja: Pacjent posiada KartaPacjenta)
+Wizyta         o--   Pacjent          (asocjacja)
+Wizyta         o--   Lekarz           (asocjacja)
+Wizyta         o--   Diagnoza         (asocjacja)
+Wizyta         --    StatusWizyty     (użycie enuma)
+KartaPacjenta  o--   Wizyta           (agregacja: lista wizyt)
+Oddzial        o--   Pracownik        (agregacja: lista pracowników)
+Oddzial        o--   Pacjent          (agregacja: lista pacjentów)
+Lekarz         o--   Wizyta           (agregacja: lista wizyt lekarza)
+SystemPrzyjec  o--   Pacjent          (agregacja)
+SystemPrzyjec  o--   Pracownik        (agregacja)
+SystemPrzyjec  o--   Oddzial          (agregacja)
+SystemPrzyjec  o--   Wizyta           (agregacja)
+GlowneOkno     o--   SystemPrzyjec    (asocjacja: singleton)
+```
