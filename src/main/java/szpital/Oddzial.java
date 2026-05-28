@@ -8,7 +8,6 @@ public class Oddzial {
     private String numerOddzialu;
     private int maxLozek;
     private List<Pracownik> pracownicy;
-    public List<Pracownik> pobierzPracownikow() { return pracownicy; }
     private List<Pacjent> pacjenci;
 
     public Oddzial(String nazwaOddzialu, String numerOddzialu, int maxLozek) {
@@ -19,12 +18,11 @@ public class Oddzial {
         this.pacjenci = new ArrayList<>();
     }
 
+    // Zwraca false jesli brak wolnych miejsc
     public boolean przyjmijPacjenta(Pacjent pacjent) {
-        if (dostepneLozka() > 0) {
-            pacjenci.add(pacjent);
-            return true;
-        }
-        return false;
+        if (dostepneLozka() <= 0) return false;
+        pacjenci.add(pacjent);
+        return true;
     }
 
     public boolean wypiszPacjenta(Pacjent pacjent) {
@@ -39,6 +37,10 @@ public class Oddzial {
         pracownicy.remove(pracownik);
     }
 
+    public int dostepneLozka() {
+        return maxLozek - pacjenci.size();
+    }
+
     public String wyswietlStatus() {
         return "Oddzial: " + nazwaOddzialu + " (" + numerOddzialu + ")\n" +
                "Zajete lozka: " + pacjenci.size() + " / " + maxLozek + "\n" +
@@ -46,39 +48,21 @@ public class Oddzial {
                "Liczba personelu: " + pracownicy.size();
     }
 
-    public int dostepneLozka() {
-        return maxLozek - pacjenci.size();
-    }
-
     public String wyswietlPracownikow() {
-        if (pracownicy.isEmpty()) {
-            return "Brak przypisanego personelu do oddzialu " + nazwaOddzialu + ".";
-        }
+        if (pracownicy.isEmpty()) return "Brak przypisanego personelu do oddzialu " + nazwaOddzialu + ".";
         StringBuilder sb = new StringBuilder("Personel oddzialu " + nazwaOddzialu + ":\n");
-        for (Pracownik p : pracownicy) {
-            sb.append("  ").append(p.toString()).append("\n");
-        }
+        for (Pracownik p : pracownicy) sb.append("  ").append(p).append("\n");
         return sb.toString();
     }
 
-    public String pobierzNazwe() {
-        return nazwaOddzialu;
-    }
-
-    public String pobierzNumer() {
-        return numerOddzialu;
-    }
-
-    public int pobierzMaxLozek() {
-        return maxLozek;
-    }
-
-    public List<Pacjent> pobierzPacjentow() {
-        return pacjenci;
-    }
+    public String pobierzNazwe()      { return nazwaOddzialu; }
+    public String pobierzNumer()      { return numerOddzialu; }
+    public int pobierzMaxLozek()      { return maxLozek; }
+    public List<Pacjent> pobierzPacjentow()     { return pacjenci; }
+    public List<Pracownik> pobierzPracownikow() { return pracownicy; }
 
     @Override
     public String toString() {
-        return nazwaOddzialu + " [" + numerOddzialu + "] | wolne lozka: " + dostepneLozka() + "/" + maxLozek;
+        return nazwaOddzialu + " [" + numerOddzialu + "] | wolne: " + dostepneLozka() + "/" + maxLozek;
     }
 }

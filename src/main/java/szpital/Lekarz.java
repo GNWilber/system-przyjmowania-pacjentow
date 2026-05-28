@@ -32,26 +32,30 @@ public class Lekarz extends Pracownik {
                "Liczba wizyt: " + listaWizyt.size();
     }
 
+    // Rejestruje wizyte ambulatoryjną na miejscu (poza harmonogramem)
     public Wizyta przyjmijPacjenta(Pacjent pacjent) {
-        String idWizyty = "W" + System.currentTimeMillis();
-        Wizyta wizyta = new Wizyta(idWizyty, pacjent, this, LocalDateTime.now());
+        Wizyta wizyta = new Wizyta(pacjent, this, LocalDateTime.now());
         listaWizyt.add(wizyta);
         wizyta.rozpocznijWizyte();
         return wizyta;
     }
 
+    // Przeciazenie: diagnoza bez zalecen
     public Diagnoza wystawDiagnoze(Wizyta wizyta, String opis, String kodICD) {
-        String idDiagnozy = "D" + System.currentTimeMillis();
-        Diagnoza diagnoza = new Diagnoza(idDiagnozy, opis, kodICD);
+        Diagnoza diagnoza = new Diagnoza(opis, kodICD);
         wizyta.zakonczWizyte(diagnoza);
         return diagnoza;
     }
 
+    // Przeciazenie: diagnoza z zaleceniami
     public Diagnoza wystawDiagnoze(Wizyta wizyta, String opis, String kodICD, String zalecenia) {
-        String idDiagnozy = "D" + System.currentTimeMillis();
-        Diagnoza diagnoza = new Diagnoza(idDiagnozy, opis, kodICD, zalecenia);
+        Diagnoza diagnoza = new Diagnoza(opis, kodICD, zalecenia);
         wizyta.zakonczWizyte(diagnoza);
         return diagnoza;
+    }
+
+    public void dodajWizyte(Wizyta wizyta) {
+        listaWizyt.add(wizyta);
     }
 
     public void ustawDostepnosc(boolean stan) {
@@ -69,17 +73,8 @@ public class Lekarz extends Pracownik {
         return sb.toString();
     }
 
-    public void dodajWizyte(Wizyta wizyta) {
-        listaWizyt.add(wizyta);
-    }
-
-    public String pobierzNumerPWZ() {
-        return numerPWZ;
-    }
-
-    public boolean czyDostepny() {
-        return dostepny;
-    }
+    public String pobierzNumerPWZ() { return numerPWZ; }
+    public boolean czyDostepny()    { return dostepny; }
 
     @Override
     public String toString() {

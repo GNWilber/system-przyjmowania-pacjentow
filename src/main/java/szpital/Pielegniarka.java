@@ -28,22 +28,20 @@ public class Pielegniarka extends Pracownik {
 
     public void przydzielLozko(Pacjent pacjent, int numerLozka) {
         System.out.println("Pielęgniarka " + imie + " przydzielila lozko nr " +
-                           numerLozka + " dla: " + pacjent.toString());
+                           numerLozka + " dla: " + pacjent);
     }
 
     public void zaopiekujSie(Pacjent pacjent) {
         System.out.println("Pielęgniarka " + imie + " " + nazwisko +
-                           " zaopiekowala sie pacjentem: " + pacjent.toString());
+                           " zaopiekowala sie pacjentem: " + pacjent);
     }
 
-    public void zmienOddzial(Oddzial oddzial) {
-        this.oddzial = oddzial;
+    public void zmienOddzial(Oddzial nowyOddzial) {
+        this.oddzial = nowyOddzial;
         System.out.println("Pielęgniarka " + imie + " " + nazwisko + " przeniesiona na inny oddzial.");
     }
 
-    public int pobierzNumerSali() {
-        return numerSali;
-    }
+    public int pobierzNumerSali() { return numerSali; }
 
     @Override
     public String toString() {

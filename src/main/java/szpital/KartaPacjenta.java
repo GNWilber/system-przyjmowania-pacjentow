@@ -32,35 +32,25 @@ public class KartaPacjenta {
     }
 
     public String generujHistorie() {
-        if (historiaWizyt.isEmpty()) {
-            return "Brak wizyt w historii.\n";
-        }
+        if (historiaWizyt.isEmpty()) return "Brak wizyt w historii.\n";
         StringBuilder sb = new StringBuilder("Historia wizyt:\n");
         for (Wizyta w : historiaWizyt) {
-            sb.append("  ").append(w.toString()).append("\n");
+            sb.append("  ").append(w).append("\n");
         }
         return sb.toString();
     }
 
     public String wyswietlAlergie() {
-        if (alergie.isEmpty()) {
-            return "Brak zarejestrowanych alergii.";
-        }
+        if (alergie.isEmpty()) return "Brak zarejestrowanych alergii.";
         StringBuilder sb = new StringBuilder("Alergie:\n");
-        for (String a : alergie) {
-            sb.append("  - ").append(a).append("\n");
-        }
+        for (String a : alergie) sb.append("  - ").append(a).append("\n");
         return sb.toString();
     }
 
     public String wyswietlChoroby() {
-        if (chorobyPrzewlekle.isEmpty()) {
-            return "Brak chorob przewleklych.";
-        }
+        if (chorobyPrzewlekle.isEmpty()) return "Brak chorob przewleklych.";
         StringBuilder sb = new StringBuilder("Choroby przewlekle:\n");
-        for (String c : chorobyPrzewlekle) {
-            sb.append("  - ").append(c).append("\n");
-        }
+        for (String c : chorobyPrzewlekle) sb.append("  - ").append(c).append("\n");
         return sb.toString();
     }
 

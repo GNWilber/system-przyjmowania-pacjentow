@@ -20,6 +20,10 @@ public abstract class Pracownik extends Osoba {
     @Override
     public abstract String wyswietlInfo();
 
+    public void dezaktywuj() {
+        this.aktywny = false;
+    }
+
     public String wyswietlKarte() {
         return "ID: " + idPracownika + "\n" +
                "Pracownik: " + imie + " " + nazwisko + "\n" +
@@ -27,7 +31,7 @@ public abstract class Pracownik extends Osoba {
                "Aktywny: " + aktywny;
     }
 
-    public void dezaktywuj() {
-        this.aktywny = false;
-    }
+    public String pobierzIdPracownika()  { return idPracownika; }
+    public String pobierzSpecjalizacje() { return specjalizacja; }
+    public boolean czyAktywny()          { return aktywny; }
 }

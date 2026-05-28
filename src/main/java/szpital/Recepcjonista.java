@@ -26,28 +26,25 @@ public class Recepcjonista extends Pracownik {
                "Zarejestrowanych dzisiaj: " + zarejestrowanychDzisiaj;
     }
 
+    // Przeciazenie: rejestracja standardowa
     public String zarejestrujPacjenta(Pacjent pacjent) {
         zarejestrowanychDzisiaj++;
-        return "Pacjent " + pacjent.toString() + " zostal zarejestrowany na stanowisku " + numerStanowiska + ".";
+        return "Pacjent " + pacjent + " zostal zarejestrowany na stanowisku " + numerStanowiska + ".";
     }
 
+    // Przeciazenie: rejestracja z opcjonalnym priorytetem
     public String zarejestrujPacjenta(Pacjent pacjent, boolean priorytet) {
         zarejestrowanychDzisiaj++;
-        String komunikat = "Pacjent " + pacjent.toString() + " zostal zarejestrowany";
-        if (priorytet) {
-            komunikat += " z TRYBEM PRIORYTETOWYM";
-        }
-        return komunikat + " na stanowisku " + numerStanowiska + ".";
+        String info = priorytet ? " z TRYBEM PRIORYTETOWYM" : "";
+        return "Pacjent " + pacjent + " zostal zarejestrowany" + info +
+               " na stanowisku " + numerStanowiska + ".";
     }
 
     public String wyswietlStatystyki() {
-        return "Stanowisko nr " + numerStanowiska + " | " +
-               "Zarejestrowanych dzisiaj: " + zarejestrowanychDzisiaj;
+        return "Stanowisko nr " + numerStanowiska + " | Zarejestrowanych dzisiaj: " + zarejestrowanychDzisiaj;
     }
 
-    public int pobierzNumerStanowiska() {
-        return numerStanowiska;
-    }
+    public int pobierzNumerStanowiska() { return numerStanowiska; }
 
     @Override
     public String toString() {

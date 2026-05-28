@@ -18,16 +18,20 @@ public abstract class Osoba {
 
     public abstract String wyswietlInfo();
 
-    @Override
-    public String toString() {
-        return imie + " " + nazwisko + " (PESEL: " + pesel + ")";
+    public int obliczWiek() {
+        return Period.between(dataUrodzenia, LocalDate.now()).getYears();
     }
 
     public boolean peselPasuje(String pesel) {
         return this.pesel.equals(pesel);
     }
 
-    public int obliczWiek() {
-        return Period.between(dataUrodzenia, LocalDate.now()).getYears();
+    public String pobierzImie()    { return imie; }
+    public String pobierzNazwisko() { return nazwisko; }
+    public String pobierzPesel()   { return pesel; }
+
+    @Override
+    public String toString() {
+        return imie + " " + nazwisko + " (PESEL: " + pesel + ")";
     }
 }
